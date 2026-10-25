@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Phish Frenzy — the scam-spotting quiz you play with friends</title>
 <meta name="description" content="Free real-time multiplayer quiz game. Play solo against bots, or create a room and share the code with friends. Turn your own notes or PDF into a quiz. No logins, no installs." />
+<meta name="theme-color" content="#0B1020" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎣</text></svg>" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -68,7 +70,7 @@
       <div class="row">
         <button id="btn-notes" class="btn">Build my quiz</button>
         <label class="filebtn" for="file-input">Upload PDF / TXT / MD</label>
-        <input id="file-input" type="file" accept=".pdf,.txt,.md,text/plain,application/pdf" hidden />
+        <input id="file-input" class="file-input-hidden" type="file" accept=".pdf,.txt,.md,text/plain,application/pdf" />
       </div>
       <p id="quiz-status" class="quiz-status" role="status"></p>
       <p id="quiz-reset-row" class="hidden reset-row">

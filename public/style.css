@@ -98,6 +98,8 @@ input,textarea{font-family:inherit}
 }
 .filebtn:hover{border-color:var(--border-strong); background:var(--bg-4)}
 .filebtn:focus-within{outline:2px solid var(--focus); outline-offset:2px}
+/* Visually hidden but still keyboard-focusable (unlike [hidden]/display:none) */
+.file-input-hidden{position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; clip:rect(0 0 0 0)}
 
 /* Fields */
 .field-block{margin-bottom:var(--s5)}
