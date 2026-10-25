@@ -2,126 +2,161 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Phish Frenzy — Multiplayer Quiz: Bots or Friends, Your Notes or Ours</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Phish Frenzy — the scam-spotting quiz you play with friends</title>
 <meta name="description" content="Free real-time multiplayer quiz game. Play solo against bots, or create a room and share the code with friends. Turn your own notes or PDF into a quiz. No logins, no installs." />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="bg-glow"></div>
-  <div id="conn-banner" class="conn-banner hidden">⚠️ Connection lost — reconnecting… your seat and score are saved if you rejoin this room with the same name.</div>
+  <div class="bg-glow" aria-hidden="true"></div>
+  <div id="conn-banner" class="conn-banner hidden" role="alert">⚠️ You're offline — reconnecting… Rejoin this room with the same name to keep your seat and score.</div>
+
   <main class="wrap">
     <header class="brand">
-      <div class="logo">🎣</div>
+      <div class="logo" aria-hidden="true">🎣</div>
       <div>
         <h1>Phish <span>Frenzy</span></h1>
         <p class="tag">The multiplayer quiz arena — spot scams, top the board.</p>
       </div>
     </header>
 
-    <!-- HOME -->
-    <section id="screen-home" class="card screen active">
-      <label>Step 1 — Your name (no account, no password, ever)
-        <input id="name-input" maxlength="16" placeholder="e.g. Manoj" autocomplete="off" />
-      </label>
+    <!-- ============ HOME ============ -->
+    <section id="screen-home" class="card screen active" tabindex="-1" aria-label="Home">
+      <div class="field-block">
+        <label class="field-label" for="name-input">1 · Your name</label>
+        <p class="helper">No sign-up, no password — just the name your friends will see.</p>
+        <input id="name-input" maxlength="16" placeholder="e.g. Manoj" autocomplete="off" enterkeyhint="go" />
+      </div>
 
-      <p class="step">Step 2 — Who do you want to play against?</p>
+      <h2 class="step-title">2 · Pick your match</h2>
       <div class="modes">
         <div class="mode">
           <h3>🤖 Solo vs Bots</h3>
-          <p>Just you against two built-in bots. Instant practice, no waiting.</p>
-          <button id="btn-bots" class="btn primary wide">Play vs Bots</button>
+          <p>Two house bots, zero waiting. The perfect warm-up.</p>
+          <button id="btn-bots" class="btn wide">Play vs Bots</button>
         </div>
         <div class="mode">
-          <h3>👥 Play with Friends</h3>
-          <p><b>Create a room</b> to get a room code, then share that code. Friends enter the <b>same code</b> to land in your room and play the same quiz, live.</p>
-          <button id="btn-create" class="btn primary wide">Create a room</button>
-          <div class="divider"><span>already have a code?</span></div>
-          <div class="row">
-            <input id="code-input" maxlength="4" placeholder="CODE" class="code-input" autocomplete="off" />
+          <h3>👥 With Friends</h3>
+          <p>Start a room, share its code, and race your friends on the same quiz — live, on any device.</p>
+          <button id="btn-create" class="btn primary wide">Create room</button>
+          <div class="divider"><span>Have a code from a friend?</span></div>
+          <div class="join-row">
+            <label class="visually-hidden" for="code-input">Room code</label>
+            <input id="code-input" maxlength="4" placeholder="CODE" class="code-input" autocomplete="one-time-code" autocapitalize="characters" />
             <button id="btn-join" class="btn">Join room</button>
           </div>
         </div>
       </div>
-      <p id="home-error" class="error"></p>
+      <p id="quiz-loaded-note" class="note note-success hidden">✅ Your custom quiz is loaded — the next room you open plays it.</p>
+      <p id="home-error" class="error" role="alert"></p>
 
       <div class="howto">
-        <h3>📖 How to play — the whole game, no explanation needed</h3>
-        <ul>
-          <li><b>Goal:</b> score the most points. Highest score when the game ends wins. 🏆</li>
-          <li><b>A game is 10 questions.</b> Every question has <b>4 options</b> and a <b>25-second</b> timer. Everyone answers the same question at the same time.</li>
-          <li><b>Tap once — your answer locks in</b> and can't be changed. You instantly see if you were right, why, and your points.</li>
-          <li><b>Scoring:</b> 100 pts for a correct answer + up to 100 speed bonus (faster = more) + 25 pts streak bonus when you hit 3 correct in a row (that's the 🔥 next to a name).</li>
-          <li><b>The round ends</b> when everyone has answered or time runs out. After question 10, the final podium shows the winner.</li>
-          <li><b>👑 = the host</b> (the person who created the room). Only the host can press Start and Play Again. Up to 12 players per room. Joining mid-game makes you a spectator for that game — you play from the next one.</li>
-          <li><b>🔑 Room codes:</b> a code is the key to one room. It stays valid while your group is playing and is deleted only after the game finishes <i>and</i> everyone has left. Anyone with the code can join, so share it only with your group.</li>
-          <li><b>Dropped connection?</b> Rejoin the same room with the same name and you reclaim your seat and score.</li>
-        </ul>
+        <h3>📖 How to play</h3>
+        <p class="howto-sub">The whole game in 20 seconds:</p>
+        <p><b>The goal.</b> Most points wins. A game is 10 questions, everyone answers the same one at the same time, and the podium at the end crowns the winner. 🏆</p>
+        <p><b>Scoring.</b> A correct answer is worth 100 pts, plus up to 100 more for speed, plus a 25-pt bonus when you hit 3 correct in a row — that's the 🔥 beside a name. You get 25 seconds per question, and one tap locks your answer in for good.</p>
+        <p><b>The room.</b> The 👑 host (whoever created the room) presses Start and Play again. Up to 12 players fit. Joining mid-game? You watch this one and play from the next. Your room code stays alive while your group is playing and is deleted only after the game ends and everyone has left — anyone with the code can join, so share it with your group only.</p>
+        <p><b>If you drop.</b> Rejoin the same room with the same name and your seat and score are yours again.</p>
       </div>
 
-      <div class="divider"><span>make it yours</span></div>
-      <h3>📚 Build a quiz from YOUR notes</h3>
-      <p class="how">Paste notes (200+ characters; definitions like “X is…” work best) or upload a PDF/TXT/MD (max 6 MB) — the game analyses them and builds a brand-new 4-option quiz for your room. Any group with your room code can then test themselves on <i>your</i> material. If fewer than 10 questions can be built, your game is simply a little shorter.</p>
+      <div class="divider"><span>Make it yours</span></div>
+      <h3 class="section-title">📚 Turn your notes into a quiz</h3>
+      <p class="how">Paste your notes or upload a file, and we'll write a fresh 4-option quiz from them — definitions like “X is…” work best. Your room plays your quiz; everyone else's rooms never see it. Fewer than 10 questions in your notes? Your game is just a little shorter.</p>
+      <label class="visually-hidden" for="notes-input">Your notes</label>
       <textarea id="notes-input" rows="5" placeholder="Paste your notes here… (definitions like “Photosynthesis is the process by which…” work best)"></textarea>
+      <p class="helper">Notes need at least 200 characters. Files: PDF, TXT or MD, up to 6 MB.</p>
       <div class="row">
-        <button id="btn-notes" class="btn">Build quiz from pasted notes</button>
-        <label class="filebtn">Upload PDF / TXT / MD
-          <input id="file-input" type="file" accept=".pdf,.txt,.md,text/plain,application/pdf" hidden />
-        </label>
+        <button id="btn-notes" class="btn">Build my quiz</button>
+        <label class="filebtn" for="file-input">Upload PDF / TXT / MD</label>
+        <input id="file-input" type="file" accept=".pdf,.txt,.md,text/plain,application/pdf" hidden />
       </div>
-      <p id="quiz-status" class="quiz-status"></p>
-      <p id="quiz-reset-row" class="fine hidden">Using a custom quiz right now. <a href="#" id="quiz-reset">✖ Switch back to the built-in scam-spotting bank</a></p>
+      <p id="quiz-status" class="quiz-status" role="status"></p>
+      <p id="quiz-reset-row" class="hidden reset-row">
+        <span class="fine">Using your custom quiz for your next room.</span>
+        <button id="quiz-reset" class="btn">Switch back to the built-in bank</button>
+      </p>
     </section>
 
-    <!-- LOBBY -->
-    <section id="screen-lobby" class="card screen">
-      <h2>Room <span id="lobby-code" class="pill"></span> <button id="btn-copy" class="btn small">📋 Copy code</button></h2>
-      <p class="how">Friends: open this same page → <b>Play with Friends</b> → enter this code. The code stays alive until the game ends and everyone leaves.</p>
-      <p class="fine">👑 = host — only the host can start the game. 10 questions • 4 options each • 25 seconds per question • most points wins.</p>
+    <!-- ============ LOBBY ============ -->
+    <section id="screen-lobby" class="card screen" tabindex="-1" aria-label="Lobby">
+      <p id="lobby-eyebrow" class="eyebrow">Your room is open</p>
+      <h2 class="screen-title">Lobby</h2>
+
+      <div class="code-panel">
+        <p class="code-caption">ROOM CODE</p>
+        <p id="lobby-code" class="code-display">····</p>
+        <button id="btn-copy" class="btn" aria-live="polite">📋 Copy code</button>
+      </div>
+
+      <p class="how">Friends: send them this page's link, then the code. They tap <b>With Friends</b>, type the code, and they're in. The code stays alive until the game ends and everyone has left.</p>
+      <p class="facts">10 questions · 4 options each · 25 sec per question · Most points wins</p>
+      <p id="host-line" class="helper"></p>
       <p id="lobby-source" class="fine"></p>
-      <p id="spectator-note" class="quiz-status hidden">👀 A game is running in this room — you're spectating this one and will play from the next game.</p>
+      <p id="spectator-note" class="note note-spectator hidden">👀 A game is running in this room — you're watching this one and will play from the next game.</p>
+
+      <h3 id="players-heading" class="list-heading">Players (0)</h3>
       <ul id="lobby-players" class="players"></ul>
-      <div class="row">
-        <button id="btn-start" class="btn primary hidden">▶ Start game</button>
+      <p id="solo-note" class="helper hidden">Just you so far — share the code and hang tight, or press Start to play solo.</p>
+
+      <div class="action-row">
+        <button id="btn-start" class="btn primary grow hidden">▶ Start game</button>
         <button id="btn-leave-lobby" class="btn">Leave room</button>
       </div>
       <p id="lobby-wait" class="fine">Waiting for the host to start…</p>
     </section>
 
-    <!-- GAME -->
-    <section id="screen-game" class="card screen">
+    <!-- ============ GAME ============ -->
+    <section id="screen-game" class="card screen" tabindex="-1" aria-label="Game">
       <div class="game-top">
-        <span id="round-label" class="pill"></span>
-        <div class="timerbar"><div id="timer-fill"></div></div>
-        <span id="timer-text" class="timer-text">25s</span>
-        <span id="answered-label" class="fine"></span>
+        <span id="round-label" class="pill">Round –/–</span>
+        <span id="answered-label" class="answered">0 answered</span>
+        <div class="timerbar" id="timerbar" role="progressbar" aria-label="Time left" aria-valuemin="0" aria-valuemax="25" aria-valuenow="25"><div id="timer-fill"></div></div>
+        <span id="timer-text" class="timer-text" aria-hidden="true">25s</span>
       </div>
-      <div class="scenario">
-        <p id="q-scenario" class="scenario-text hidden"></p>
-        <p id="q-prompt" class="prompt-text"></p>
+
+      <div class="game-grid">
+        <div class="game-main">
+          <div class="scenario">
+            <p id="q-scenario" class="scenario-text hidden"></p>
+            <p id="q-prompt" class="prompt-text"></p>
+          </div>
+          <div id="options" class="options"></div>
+          <div id="feedback" class="feedback hidden" role="status"></div>
+          <p id="hash-line" class="fine hash-line"></p>
+          <details id="hash-proof" class="proof hidden">
+            <summary>See the proof</summary>
+            <p id="hash-proof-body" class="fine"></p>
+          </details>
+        </div>
+        <aside class="board-block">
+          <h3 class="board-title">Live leaderboard</h3>
+          <p class="fine legend">🔥 = 3+ correct in a row · 👑 = host · 👀 = watching</p>
+          <ul id="board" class="players"></ul>
+        </aside>
       </div>
-      <div id="options" class="options"></div>
-      <div id="feedback" class="feedback hidden"></div>
-      <p id="hash-line" class="fine"></p>
-      <h4 class="board-title">Live leaderboard <span class="fine">(🔥 = 3+ correct in a row)</span></h4>
-      <ul id="board" class="players"></ul>
+
       <button id="btn-leave-game" class="btn">Leave room</button>
     </section>
 
-    <!-- PODIUM -->
-    <section id="screen-podium" class="card screen">
-      <h2 id="winner-line">🏆 Final results</h2>
+    <!-- ============ PODIUM ============ -->
+    <section id="screen-podium" class="card screen" tabindex="-1" aria-label="Results">
+      <p class="eyebrow">Game over</p>
+      <h2 id="winner-line" class="screen-title">🏆 Final results</h2>
       <div id="podium"></div>
+      <h3 class="list-heading">Final standings</h3>
       <ul id="final-board" class="players"></ul>
+
       <div id="review-zone" class="hidden">
-        <h3>📚 Review — the ones you missed</h3>
+        <h3 class="list-heading">📚 Review the ones you missed</h3>
         <div id="review-list"></div>
       </div>
-      <div class="row">
-        <button id="btn-again" class="btn primary hidden">↩ Play again in this room</button>
+
+      <div class="action-row">
+        <button id="btn-again" class="btn primary grow hidden">Play again</button>
         <button id="btn-leave-podium" class="btn">Leave room</button>
       </div>
-      <p class="fine">Non-hosts: the host can restart this room with Play Again. When everyone leaves after a finished game, this room code is deleted and retired.</p>
+      <p class="fine">Want another round? The host can tap Play again — this room stays open until everyone leaves.</p>
+      <p class="fine">When everyone leaves, this room code is deleted and retired.</p>
     </section>
 
     <footer class="foot">Free to play • No logins • Built for the Handshake × OpenAI “Create a Multiplayer Game” mission</footer>
