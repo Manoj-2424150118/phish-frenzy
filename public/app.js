@@ -1,7 +1,10 @@
+/* Phish Frenzy client — speaks the server.js protocol exactly:
+   create_room {name, mode?, quizToken} · join_room {name, code} · answer {optionIndex}
+   events: room_state, question, answer_result, answer_count, leaderboard, round_end, game_over */
 const socket = io();
 let myId = null, isHost = false, timerInt = null, quizToken = null;
 let answered = false, iAmSpectator = false, wasConnected = false;
-let currentPrompt = '', missed = [], myPicked = -1, currentScreen = 'home';
+let currentPrompt = '', missed = [], myPicked = -1, currentScreen = 'home', activeTotal = 0;
 
 const $ = id => document.getElementById(id);
 const screens = ['home', 'lobby', 'game', 'podium'];
@@ -15,8 +18,7 @@ const myName = () => $('name-input').value.trim() || 'Player';
 socket.on('connect', () => {
   myId = socket.id;
   $('conn-banner').classList.add('hidden');
-  if (wasConnected) { try { sessionStorage.removeItem('pf_autoresume'); } catch (_) {} }
-  // After a drop, offer one-tap resume: rejoin the same room with the same name.
+  // After a drop, rejoin the same room with the same name to reclaim the seat.
   if (wasConnected) {
     try {
       const saved = JSON.parse(sessionStorage.getItem('pf_room') || 'null');
@@ -39,21 +41,23 @@ function setBusy(btn, busy) {
   btn.setAttribute('aria-busy', busy ? 'true' : 'false');
 }
 function enterRoom(event, payload) {
-  const btn = event === 'create_room' ? (payload && payload.bots ? $('btn-bots') : $('btn-create')) : $('btn-join');
+  const btn = event === 'create_room'
+    ? (payload && payload.mode === 'bots' ? $('btn-bots') : $('btn-create'))
+    : $('btn-join');
   if (btn && btn.dataset.busy === '1') return;
   if (btn) { btn.dataset.busy = '1'; btn.disabled = true; setBusy(btn, true); }
   $('home-error').textContent = '';
   socket.emit(event, Object.assign({ name: myName() }, payload || {}), res => {
     if (btn) { delete btn.dataset.busy; btn.disabled = false; setBusy(btn, false); }
-    if (!res || !res.ok) { $('home-error').textContent = (res && res.error) || 'Something blocked the door — give it another tap.'; }
+    if (!res || !res.ok) { $('home-error').textContent = (res && res.error) || 'Something blocked the door — give it another tap.'; show('home'); }
   });
 }
-$('btn-bots').onclick = () => enterRoom('create_room', { bots: true, quizToken });
-$('btn-create').onclick = () => enterRoom('create_room', { bots: false, quizToken });
+$('btn-bots').onclick = () => enterRoom('create_room', { mode: 'bots', quizToken });
+$('btn-create').onclick = () => enterRoom('create_room', { quizToken });
 $('btn-join').onclick = () => {
   const code = $('code-input').value.trim().toUpperCase();
   if (code.length !== 4) { $('home-error').textContent = 'Room codes are 4 letters — check the code and try again.'; return; }
-  enterRoom('join_room', { code, quizToken });
+  enterRoom('join_room', { code });
 };
 $('code-input').addEventListener('keydown', e => { if (e.key === 'Enter') $('btn-join').click(); });
 $('name-input').addEventListener('keydown', e => { if (e.key === 'Enter') $('btn-create').click(); });
@@ -106,20 +110,22 @@ $('file-input').addEventListener('change', async e => {
   } catch (_) { quizFailed('Could not read that file. Try pasting the notes instead.'); }
 });
 
-/* ---------- Room state / lobby ---------- */
-function playerRows(players) {
-  return players.map(p => {
+/* ---------- Shared player rendering ---------- */
+function playerRows(players, withRank) {
+  return players.map((p, i) => {
     const streak = p.streak >= 3 ? ' <span class="streak">🔥' + p.streak + '</span>' : '';
     const you = p.id === myId ? '<span class="you-tag">You</span>' : '';
-    return '<li class="' + (p.id === myId ? 'me' : '') + (p.away ? ' away' : '') + '">' +
-      '<span class="pname">' + (p.rank ? p.rank + '. ' : '') + esc(p.name) + (p.isHost ? ' 👑' : '') + (p.spectator ? ' 👀' : '') + (p.away ? ' (away)' : '') + you + '</span>' +
+    const away = p.connected === false;
+    return '<li class="' + (p.id === myId ? 'me' : '') + (away ? ' away' : '') + '">' +
+      '<span class="pname">' + (withRank ? (i + 1) + '. ' : '') + esc(p.name) + (p.isHost ? ' 👑' : '') + (p.spectator ? ' 👀' : '') + (away ? ' (away)' : '') + you + '</span>' +
       '<span class="pscore">' + p.score + streak + '</span></li>';
   }).join('');
 }
 
+/* ---------- Room state / lobby / board ---------- */
 socket.on('room_state', st => {
   isHost = st.hostId === myId;
-  const me = st.players.find(p => p.id === myId);
+  const me = (st.players || []).find(p => p.id === myId);
   iAmSpectator = !!(me && me.spectator);
   rememberRoom(st.code);
   if (st.phase === 'lobby') {
@@ -129,12 +135,11 @@ socket.on('room_state', st => {
     $('host-line').textContent = isHost
       ? "👑 You're the host — you press Start when your crew is in."
       : '👑 marks the host — only they can start the game.';
-    const src = st.quizSource || 'Phish Frenzy — Scam-Spotting Bank';
-    const total = st.totalRounds || 10;
-    $('lobby-source').textContent = 'Quiz: ' + src + ' • ' + total + ' questions this game';
+    const src = st.sourceTitle || 'Phish Frenzy — Scam-Spotting Bank';
+    $('lobby-source').textContent = 'Quiz: ' + src + ' • ' + (st.totalRounds || 10) + ' questions this game';
     $('spectator-note').classList.toggle('hidden', !iAmSpectator);
     $('players-heading').textContent = 'Players (' + st.players.length + ')';
-    $('lobby-players').innerHTML = playerRows(st.players);
+    $('lobby-players').innerHTML = playerRows(st.players, false);
     const humans = st.players.filter(p => !p.isBot).length;
     const hasBots = st.players.some(p => p.isBot);
     $('solo-note').classList.toggle('hidden', !(humans === 1 && !hasBots));
@@ -143,14 +148,17 @@ socket.on('room_state', st => {
       ? 'You are watching this game — you will play from the next one.'
       : (isHost ? '' : 'Waiting for the host to start…');
     $('lobby-wait').style.display = isHost ? 'none' : '';
-  } else if (st.phase === 'playing') {
+  } else if (st.phase === 'question' || st.phase === 'round_end') {
     if (currentScreen !== 'game') show('game');
-    $('board').innerHTML = playerRows(st.players.map((p, i) => ({ ...p, rank: i + 1 })));
-    $('answered-label').textContent = (st.answeredCount || 0) + '/' + st.players.filter(p => !p.spectator).length + ' answered';
-  } else if (st.phase === 'over') {
-    // Rendered by game_over; room_state here just keeps the lobby data fresh.
-    $('board').innerHTML = playerRows(st.players.map((p, i) => ({ ...p, rank: i + 1 })));
+    $('board').innerHTML = playerRows(st.players, true);
   }
+  // phase 'podium' is rendered by game_over; nothing extra needed here.
+});
+socket.on('leaderboard', data => {
+  if (data && data.players) $('board').innerHTML = playerRows(data.players, true);
+});
+socket.on('answer_count', data => {
+  if (data) $('answered-label').textContent = data.answered + '/' + data.total + ' answered';
 });
 
 $('btn-copy').onclick = async () => {
@@ -161,9 +169,9 @@ $('btn-copy').onclick = async () => {
     try { document.execCommand('copy'); } catch (__) {}
     sel.removeAllRanges();
   }
-  const b = $('btn-copy'); const orig = '📋 Copy code';
+  const b = $('btn-copy');
   b.textContent = '✅ Copied';
-  setTimeout(() => { b.textContent = orig; }, 1500);
+  setTimeout(() => { b.textContent = '📋 Copy code'; }, 1500);
 };
 $('btn-start').onclick = () => socket.emit('start_game');
 $('btn-again').onclick = () => socket.emit('play_again');
@@ -177,12 +185,13 @@ function startTimer(seconds) {
   clearInterval(timerInt);
   const end = Date.now() + seconds * 1000;
   const bar = $('timerbar'), fill = $('timer-fill'), text = $('timer-text');
+  bar.setAttribute('aria-valuemax', String(seconds));
   let lastShown = -1;
   const tick = () => {
     const left = Math.max(0, (end - Date.now()) / 1000);
     fill.style.width = (left / seconds * 100) + '%';
     const s = Math.ceil(left);
-    if (s !== lastShown) { // 1Hz updates — matches the aria-valuenow cadence
+    if (s !== lastShown) { // 1Hz text/aria updates
       lastShown = s;
       text.textContent = s + 's';
       bar.setAttribute('aria-valuenow', String(s));
@@ -200,8 +209,10 @@ socket.on('question', q => {
   answered = false; myPicked = -1;
   if (q.round === 1) missed = [];
   currentPrompt = q.prompt;
+  activeTotal = (q.players || []).filter(p => !p.spectator).length;
   $('round-label').textContent = 'Round ' + q.round + '/' + q.totalRounds;
-  $('answered-label').textContent = '0 answered';
+  $('answered-label').textContent = '0/' + activeTotal + ' answered';
+  if (q.players) $('board').innerHTML = playerRows(q.players, true);
   if (q.scenario) { $('q-scenario').textContent = q.scenario; $('q-scenario').classList.remove('hidden'); }
   else $('q-scenario').classList.add('hidden');
   $('q-prompt').textContent = q.prompt;
@@ -222,9 +233,9 @@ socket.on('question', q => {
     fb2.className = 'feedback waiting';
     fb2.innerHTML = '<p class="fb-head">Locked in — waiting for everyone else…</p>';
     if (window.innerWidth < 601) setTimeout(() => fb2.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 60);
-    socket.emit('answer', { choice: myPicked });
+    socket.emit('answer', { optionIndex: myPicked });
   });
-  startTimer(q.seconds || 25);
+  startTimer(Math.round((q.timeMs || 25000) / 1000));
 });
 socket.on('answer_result', r => {
   const fb = $('feedback');
@@ -233,21 +244,38 @@ socket.on('answer_result', r => {
   if (r.streakBonus) breakdown.push('+' + r.streakBonus + ' streak bonus 🔥');
   if (r.correct) {
     fb.className = 'feedback good';
-    fb.innerHTML = '<p class="fb-head">✅ Correct! +' + r.gained + ' pts</p>' +
-      '<p class="fb-sub">' + breakdown.join(' · ') + ' — your score: ' + r.score + '</p>' +
-      '<p class="fb-body">' + esc(r.explanation) + '</p>';
+    fb.innerHTML = '<p class="fb-head">✅ Correct! +' + r.gain + ' pts</p>' +
+      '<p class="fb-sub">' + breakdown.join(' · ') + ' — your score: ' + r.yourScore + '</p>' +
+      '<p class="fb-body">' + esc(r.explain) + '</p>';
   } else {
     fb.className = 'feedback bad';
-    fb.innerHTML = '<p class="fb-head">' + (r.timedOut ? "⏰ Time's up." : '❌ Not quite — your answer is locked in.') + '</p>' +
+    fb.innerHTML = '<p class="fb-head">❌ Not quite — your answer is locked in.</p>' +
       '<p class="fb-sub">Correct answer: ' + esc(r.correctText) + '</p>' +
-      '<p class="fb-body">' + esc(r.explanation) + '</p>';
-    if (!r.correct) missed.push({ prompt: currentPrompt, correct: r.correctText, explanation: r.explanation });
+      '<p class="fb-body">' + esc(r.explain) + '</p>';
+    missed.push({ prompt: currentPrompt, correct: r.correctText, explanation: r.explain });
   }
 });
+async function verifyCommit(salt, correctText, commit) {
+  try {
+    if (!window.crypto || !crypto.subtle) return false;
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(salt + '|' + correctText));
+    const hex = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+    return hex === commit;
+  } catch (_) { return false; }
+}
 socket.on('round_end', r => {
   clearInterval(timerInt);
   $('timer-text').textContent = '0s';
   $('timerbar').setAttribute('aria-valuenow', '0');
+  if (myPicked === -1 && !iAmSpectator) {
+    // No answer submitted (time ran out): the server sends no answer_result, so record the miss here.
+    missed.push({ prompt: currentPrompt, correct: r.correctText, explanation: r.explain });
+    const fb = $('feedback');
+    fb.className = 'feedback bad';
+    fb.innerHTML = '<p class="fb-head">⏰ Time\'s up.</p>' +
+      '<p class="fb-sub">Correct answer: ' + esc(r.correctText) + '</p>' +
+      '<p class="fb-body">' + esc(r.explain) + '</p>';
+  }
   document.querySelectorAll('.opt').forEach(b => {
     const i = Number(b.dataset.i);
     b.disabled = true;
@@ -258,35 +286,39 @@ socket.on('round_end', r => {
     } else if (i === myPicked) {
       b.classList.add('wrongpick');
       b.querySelector('.mark').textContent = '✗';
-    } else if (i !== myPicked) {
+    } else {
       b.classList.add('dim');
     }
-    if (b.classList.contains('picked') && i === r.correctIndex) b.querySelector('.mark').textContent = '✓';
   });
-  $('hash-line').textContent = r.verified
-    ? '🔒 Fair-play check passed — that answer was locked before anyone played.'
-    : '🔒 The answer for that round was locked in before the question opened.';
+  if (r.players) $('board').innerHTML = playerRows(r.players, true);
   const proof = $('hash-proof');
   proof.classList.remove('hidden');
   $('hash-proof-body').textContent =
     'Locked with hash ' + String(r.commit || '').slice(0, 12) + '… · revealed with key ' + String(r.salt || '').slice(0, 8) +
     '… at round end. Anyone can re-check the maths — the answer never moved.';
+  verifyCommit(r.salt, r.correctText, r.commit).then(ok => {
+    $('hash-line').textContent = ok
+      ? '🔒 Fair-play check passed — that answer was locked before anyone played.'
+      : '🔒 The answer for that round was locked in before the question opened.';
+  });
 });
 socket.on('game_over', data => {
   clearInterval(timerInt);
   show('podium');
-  const winners = data.standings.filter(p => p.score === data.topScore && data.topScore > 0);
-  $('winner-line').textContent = data.topScore <= 0
+  const players = data.players || [];
+  const winners = data.winners || [];
+  const topScore = players.length ? players[0].score : 0;
+  $('winner-line').textContent = (!players.length || topScore <= 0)
     ? '🏆 Final results'
     : winners.length > 1
-      ? '🏆 It\'s a tie — ' + winners.map(w => w.name).join(' & ') + ' win with ' + data.topScore + ' pts!'
-      : '🏆 ' + winners[0].name + ' wins with ' + data.topScore + ' pts!';
+      ? '🏆 It\'s a tie — ' + winners.join(' & ') + ' win with ' + topScore + ' pts!'
+      : '🏆 ' + winners[0] + ' wins with ' + topScore + ' pts!';
   const medals = ['🥇', '🥈', '🥉'];
-  $('podium').innerHTML = data.standings.slice(0, 3).map((p, i) =>
+  $('podium').innerHTML = players.slice(0, 3).map((p, i) =>
     '<div class="pod' + (i === 0 ? ' first' : '') + '"><div class="medal">' + medals[i] + '</div>' +
     '<div class="pname">' + esc(p.name) + '</div><div class="pscore">' + p.score + ' pts</div></div>'
   ).join('');
-  $('final-board').innerHTML = playerRows(data.standings.map((p, i) => ({ ...p, rank: i + 1 })));
+  $('final-board').innerHTML = playerRows(players, true);
   const zone = $('review-zone');
   zone.classList.remove('hidden');
   if (missed.length) {
@@ -300,4 +332,3 @@ socket.on('game_over', data => {
   }
   $('btn-again').classList.toggle('hidden', !isHost);
 });
-socket.on('join_error', msg => { $('home-error').textContent = msg; show('home'); });
