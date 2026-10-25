@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Phish Frenzy — Spot the Scam, Beat Your Friends</title>
+<meta name="description" content="A real-time multiplayer party game: messages flash up, you decide — scam or legit? Join with a room code, no logins, any phone or laptop." />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <main class="wrap">
+    <header class="brand">
+      <div class="logo">🎣</div>
+      <div>
+        <h1>Phish <span>Frenzy</span></h1>
+        <p class="tag">Spot the scam. Beat your friends.</p>
+      </div>
+    </header>
+
+    <!-- HOME -->
+    <section id="screen-home" class="card screen active">
+      <p class="how">A message flashes up. Is it a <b>scam</b> or <b>legit</b>? Answer fast, build streaks, top the leaderboard — and learn the red flags that protect your money in real life.</p>
+      <label>Your name
+        <input id="name-input" maxlength="16" placeholder="e.g. Manoj" autocomplete="off" />
+      </label>
+      <div class="row">
+        <button id="btn-create" class="btn primary">Create a room</button>
+        <label class="check"><input type="checkbox" id="bots-check" checked /> Add 2 demo bots <span class="hint">(great for trying it solo)</span></label>
+      </div>
+      <div class="divider"><span>or join with a code</span></div>
+      <div class="row">
+        <input id="code-input" maxlength="4" placeholder="CODE" class="code-input" autocomplete="off" />
+        <button id="btn-join" class="btn">Join room</button>
+      </div>
+      <p id="home-error" class="error"></p>
+      <p class="fine">No logins. No installs. Works on any phone or laptop — share the code and play.</p>
+    </section>
+
+    <!-- LOBBY -->
+    <section id="screen-lobby" class="card screen">
+      <h2>Room <span id="lobby-code" class="pill"></span></h2>
+      <p class="how">Share this code with your friends — they open this same page and tap <b>Join room</b>.</p>
+      <ul id="lobby-players" class="players"></ul>
+      <button id="btn-start" class="btn primary hidden">▶ Start game (10 rounds)</button>
+      <p id="lobby-wait" class="fine">Waiting for the host to start…</p>
+    </section>
+
+    <!-- GAME -->
+    <section id="screen-game" class="card screen">
+      <div class="game-top">
+        <span id="round-label" class="pill"></span>
+        <div class="timerbar"><div id="timer-fill"></div></div>
+        <span id="answered-label" class="fine"></span>
+      </div>
+      <div class="scenario">
+        <div class="scenario-head"><span id="q-channel" class="chan"></span><span id="q-sender"></span></div>
+        <p id="q-message"></p>
+      </div>
+      <div id="answer-zone">
+        <button id="btn-scam" class="btn danger big">🚨 SCAM</button>
+        <button id="btn-legit" class="btn success big">✅ LEGIT</button>
+      </div>
+      <p id="answer-status" class="fine"></p>
+      <div id="reveal-zone" class="hidden">
+        <h3 id="reveal-title"></h3>
+        <p id="reveal-flag"></p>
+        <p id="reveal-gain" class="gain"></p>
+      </div>
+      <h4 class="board-title">Leaderboard</h4>
+      <ul id="board" class="players"></ul>
+    </section>
+
+    <!-- PODIUM -->
+    <section id="screen-podium" class="card screen">
+      <h2>🏆 Final results</h2>
+      <div id="podium"></div>
+      <ul id="final-board" class="players"></ul>
+      <button id="btn-again" class="btn primary hidden">↩ Back to lobby — play again</button>
+      <p class="fine">Same code, same crew — the room stays open for another game, any night.</p>
+    </section>
+
+    <footer class="foot">Built for the Handshake × OpenAI “Create a Multiplayer Game” mission • Every scenario teaches a real-world red flag</footer>
+  </main>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
