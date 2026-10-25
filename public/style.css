@@ -49,4 +49,25 @@ input{background:#0d1330;border:1px solid var(--line);color:var(--ink);border-ra
 .pod.first{border-color:var(--accent);transform:scale(1.05)}
 .pod .medal{font-size:30px}
 .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
+.step{font-weight:700;margin:20px 0 8px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mode{background:#0d1330;border:1px solid var(--line);border-radius:14px;padding:16px}
+.mode h3{margin:0 0 6px}.mode p{color:var(--muted);font-size:14px;line-height:1.5;margin:0 0 12px}
+.wide{width:100%}
+textarea{background:#0d1330;border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:13px 14px;font-size:15px;width:100%;font-family:inherit;resize:vertical}
+.filebtn{background:#1e2a52;border:1px solid var(--line);border-radius:12px;padding:13px 20px;font-size:16px;font-weight:700;cursor:pointer;margin:0}
+.quiz-status{min-height:20px;font-weight:600}
+.scenario-text{color:var(--muted);font-style:italic;line-height:1.55;margin:0 0 10px;white-space:pre-wrap}
+.prompt-text{font-size:19px;font-weight:700;line-height:1.5;margin:0}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.opt{background:#1e2a52;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:left;font-size:15.5px;cursor:pointer;line-height:1.45;transition:.12s}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+.opt:disabled{cursor:default;opacity:.85}
+.opt .letter{display:inline-block;background:var(--accent);color:#221a00;font-weight:800;border-radius:6px;padding:1px 8px;margin-right:8px}
+.opt.picked{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+.opt.correct{border-color:var(--ok);box-shadow:0 0 0 2px var(--ok) inset}
+.feedback{border-radius:14px;padding:16px;margin-top:14px;line-height:1.55}
+.feedback.good{background:#0f2e26;border:1px solid var(--ok)}
+.feedback.bad{background:#2e1420;border:1px solid var(--danger)}
+@media(max-width:560px){.modes,.options{grid-template-columns:1fr}}
 @media(max-width:520px){.brand h1{font-size:27px}#answer-zone{flex-direction:column}}

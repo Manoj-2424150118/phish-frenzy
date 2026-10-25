@@ -1,148 +1,115 @@
-// Question bank: realistic scam + legit scenarios.
-// Each: channel, sender, message, isScam (true = scam/phish), redFlag (why), source note.
+// Default bank: scam-awareness MCQs. Same shape as generated quizzes:
+// { scenario?, prompt, options[4], answer (index into options), explain }
+// The server shuffles option order per question and NEVER sends `answer` to clients.
 module.exports = [
-  {
-    channel: "SMS", sender: "VM-XYKYC",
-    message: "Dear customer, your bank account will be BLOCKED today. Complete KYC immediately: bit.ly/kyc-update-4471",
-    isScam: true,
-    redFlag: "Urgency + shortened link. Banks never ask you to complete KYC via a bit.ly link in an SMS."
-  },
-  {
-    channel: "SMS", sender: "SBI Bank",
-    message: "Rs. 2,500 debited from A/c **4821 on 24-Oct. If not done by you, call the number on the back of your card. Never share OTP with anyone.",
-    isScam: false,
-    redFlag: "Legit: no link, no request for details, and it tells you NOT to share your OTP — scammers do the opposite."
-  },
-  {
-    channel: "WhatsApp", sender: "+234 810 ••• ••42",
-    message: "Hello dear, I am HR from a big company. Part-time job, earn ₹5,000/day just liking YouTube videos. Pay ₹500 registration to start.",
-    isScam: true,
-    redFlag: "Foreign number, unrealistic pay for trivial work, and an upfront 'registration fee' — a classic task scam."
-  },
-  {
-    channel: "Email", sender: "security@paypa1-secure.com",
-    message: "We detected unusual activity. Verify your identity within 24 hours or your account will be permanently closed. [Verify Now]",
-    isScam: true,
-    redFlag: "Look closely: 'paypa1' uses the number 1, not the letter l. Fake domain + threat of closure = phishing."
-  },
-  {
-    channel: "Call", sender: "Unknown caller",
-    message: "\"This is CBI officer speaking. A parcel in your name contains illegal items. You are under digital arrest — do not disconnect, transfer money to this 'safe account' for verification.\"",
-    isScam: true,
-    redFlag: "'Digital arrest' does not exist. Police/CBI never demand money transfers on a call to 'verify' you."
-  },
-  {
-    channel: "SMS", sender: "AD-ELECBRD",
-    message: "Your electricity will be disconnected tonight at 9 PM due to unpaid bill. Call our officer immediately on 98••• ••210 to update payment.",
-    isScam: true,
-    redFlag: "Power boards don't threaten same-night disconnection by SMS or ask you to call a personal mobile number."
-  },
-  {
-    channel: "Email", sender: "noreply@github.com",
-    message: "A new sign-in was detected on your account from Chrome on Windows, Jaipur, India. If this wasn't you, secure your account from Settings > Security.",
-    isScam: false,
-    redFlag: "Legit: real domain, no credential-harvesting link, directs you to the app's own Settings — standard security alert."
-  },
-  {
-    channel: "WhatsApp", sender: "Mom (new number)",
-    message: "Hi beta, this is my new number, my phone broke. I urgently need ₹18,000 for a bill, please send to this UPI quickly, will explain later.",
-    isScam: true,
-    redFlag: "Impersonation + urgency + new number. Always voice-call the OLD number to verify before sending money."
-  },
-  {
-    channel: "SMS", sender: "UPI Alert",
-    message: "You have received a collect request of ₹4,999 from shop-pay@okbiz. Enter your UPI PIN to RECEIVE the money.",
-    isScam: true,
-    redFlag: "You NEVER enter a UPI PIN to receive money. A PIN is only for paying. This 'collect request' would debit you."
-  },
-  {
-    channel: "Email", sender: "hr@careers-google-jobs.in",
-    message: "Congratulations! You are selected for a Google internship. To reserve your slot, pay a refundable security deposit of ₹2,999 today.",
-    isScam: true,
-    redFlag: "Real companies never charge a 'refundable deposit' for a job or internship. Unofficial domain is another giveaway."
-  },
-  {
-    channel: "SMS", sender: "VM-COURIER",
-    message: "Your parcel is held at customs. Pay ₹48 clearance fee to release: track-parcel-india.xyz/pay",
-    isScam: true,
-    redFlag: "Tiny 'fee' on a suspicious .xyz domain — designed to steal your card details, not release a parcel."
-  },
-  {
-    channel: "Email", sender: "billing@netflix.com",
-    message: "Your payment method was declined. Update it by signing in to Netflix and going to Account > Billing. We will never ask for payment details by email.",
-    isScam: false,
-    redFlag: "Legit: real domain, tells you to sign in yourself, and states they never ask for payment details by email."
-  },
-  {
-    channel: "WhatsApp", sender: "Cousin (voice note)",
-    message: "A voice note in your cousin's exact voice: \"I'm stuck at the airport, phone is dying, send ₹25,000 to this number right now, please don't call back.\"",
-    isScam: true,
-    redFlag: "AI voice cloning is real. 'Don't call back' is the tell — verify via a family code word or a separate call."
-  },
-  {
-    channel: "SMS", sender: "AD-BANKOTP",
-    message: "Your OTP for a transaction of ₹1 is 483920. Valid for 10 minutes. Do NOT share this OTP with anyone, including bank staff.",
-    isScam: false,
-    redFlag: "Legit pattern: the OTP came to you unsolicited for YOUR transaction and warns against sharing. It becomes a scam only if someone calls asking for it."
-  },
-  {
-    channel: "Email", sender: "support@amazon-offers-win.com",
-    message: "You have won a FREE iPhone 16 in our anniversary lucky draw! Claim in 2 hours — just pay ₹199 shipping.",
-    isScam: true,
-    redFlag: "You can't win a draw you never entered. 'Free prize, just pay shipping' on a lookalike domain = scam."
-  },
-  {
-    channel: "Call", sender: "Bank 'manager'",
-    message: "\"Sir, your card is being misused. To block it, read me the OTP you just received so I can verify it's really you.\"",
-    isScam: true,
-    redFlag: "No bank employee will EVER ask for an OTP. The OTP is the key to your account — reading it out hands over the money."
-  },
-  {
-    channel: "SMS", sender: "TRAI Info",
-    message: "All mobile numbers not linked with Aadhaar in 24 hours will be deactivated. Update here: trai-update-portal.com",
-    isScam: true,
-    redFlag: "TRAI never sends such threats or update links. Fear + deadline + external portal = social engineering."
-  },
-  {
-    channel: "Email", sender: "team@openai.com",
-    message: "Your receipt for ChatGPT Plus — $20.00 charged to card ending 4417. View your invoice any time under Settings > Billing in ChatGPT.",
-    isScam: false,
-    redFlag: "Legit: real domain, matches a real subscription, no urgent action or credential request — just a receipt."
-  },
-  {
-    channel: "WhatsApp", sender: "Investment Guru group",
-    message: "Guaranteed 300% returns in 30 days! Our SEBI-registered experts double your money. Transfer today, limited seats only!!",
-    isScam: true,
-    redFlag: "'Guaranteed returns' are illegal to promise and impossible. Pressure + limited seats = pump-and-dump fraud."
-  },
-  {
-    channel: "SMS", sender: "VK-AIRLN",
-    message: "Your flight 6E-2041 on 28-Oct is rescheduled to depart 40 min early. Check-in closes 45 min before departure. Manage booking in the airline app.",
-    isScam: false,
-    redFlag: "Legit: specific verifiable flight details, no payment or credential request, directs you to the official app."
-  },
-  {
-    channel: "Email", sender: "it-helpdesk@yourcompany-secure-login.com",
-    message: "Mandatory password reset: your work password expires in 1 hour. Reset now: [link] Failure will lock your account before your shift.",
-    isScam: true,
-    redFlag: "External lookalike domain + 1-hour panic deadline. Real IT resets happen inside the company portal, not via emailed panic links."
-  },
-  {
-    channel: "SMS", sender: "JM-REFUND",
-    message: "Refund of ₹1,250 for your returned order has been credited to your original payment method. Ref ID: RF88213. No action needed.",
-    isScam: false,
-    redFlag: "Legit: money credited to the ORIGINAL method, a reference ID, and explicitly no action needed — scammers always need you to act."
-  },
-  {
-    channel: "WhatsApp", sender: "Landlord",
-    message: "A photo of a QR code: \"Scan this to get your security deposit back. Just enter your UPI PIN to confirm receipt.\"",
-    isScam: true,
-    redFlag: "Scanning a QR + entering a PIN PAYS money, it never receives it. Deposit-refund QR scams drain accounts."
-  },
-  {
-    channel: "Email", sender: "admissions@manipal.edu",
-    message: "Your semester fee receipt and enrolment confirmation are attached. View your full record on the student portal using your university login.",
-    isScam: false,
-    redFlag: "Legit: official university domain, informational only, points to the portal you already use — no payment link or urgency."
-  }
+  { scenario: "SMS from VM-XYKYC: “Dear customer, your bank account will be BLOCKED today. Complete KYC immediately: bit.ly/kyc-update-4471”",
+    prompt: "What is the safest action?",
+    options: ["Tap the link and complete KYC quickly", "Ignore it and check your account only in the official bank app", "Call the number given in the SMS", "Forward the SMS to friends to warn them by tapping it first"],
+    answer: 1, explain: "Banks never complete KYC via shortened SMS links. Urgency + a bit.ly link is the classic KYC phishing pattern — verify only inside the official app." },
+  { scenario: "SMS from your bank: “Rs. 2,500 debited from A/c **4821. If not done by you, call the number on the back of your card. Never share OTP with anyone.”",
+    prompt: "Is this message safe to trust?",
+    options: ["No — all bank SMS are scams", "Yes — no link, no data request, and it warns you NOT to share an OTP", "Only if it also asks for your PIN", "Yes, but only after replying with your OTP"],
+    answer: 1, explain: "Legit alerts ask for nothing and warn against sharing OTPs. Scammers do the exact opposite — they ask." },
+  { scenario: "WhatsApp from a foreign number: “Part-time job, earn ₹5,000/day liking YouTube videos. Pay ₹500 registration to start.”",
+    prompt: "What gives this away as a scam?",
+    options: ["The pay is too low", "It uses WhatsApp", "Unrealistic pay for trivial work plus an upfront fee", "It mentions YouTube"],
+    answer: 2, explain: "Task scams promise high pay for trivial work, then collect 'registration' or 'unlock' fees. Real employers never charge you to start." },
+  { scenario: "Email from security@paypa1-secure.com: “Verify your identity within 24 hours or your account will be permanently closed.”",
+    prompt: "What is the biggest red flag?",
+    options: ["The 24-hour deadline alone", "The sender domain spells PayPal with the number '1' instead of the letter 'l'", "It arrived by email", "It says 'security'"],
+    answer: 1, explain: "Lookalike domains swap characters (paypa1 vs paypal). Combined with a closure threat, this is textbook credential phishing." },
+  { scenario: "A caller says: “This is a CBI officer. A parcel in your name has illegal items. You are under digital arrest — transfer money to a safe account for verification.”",
+    prompt: "What should you do?",
+    options: ["Transfer a small amount to check", "Stay on the call and argue", "Hang up — 'digital arrest' does not exist and police never take transfers on calls", "Share your Aadhaar to prove innocence"],
+    answer: 2, explain: "There is no 'digital arrest' in law. Real officers never demand money transfers over a call — hang up and report it." },
+  { scenario: "SMS: “Your electricity will be disconnected tonight at 9 PM. Call our officer on this mobile number to update payment.”",
+    prompt: "Why is this a scam pattern?",
+    options: ["Electricity bills are monthly", "Power boards don't threaten same-night cuts by SMS or use personal mobile numbers", "The time given is too specific", "Officers never call anyone"],
+    answer: 1, explain: "Disconnection threats with a personal mobile number to 'call immediately' are a known fraud script — pay only via the official board channels." },
+  { scenario: "A voice note in your cousin's exact voice: “I'm stuck at the airport, send ₹25,000 right now, please don't call back.”",
+    prompt: "What is the safest response?",
+    options: ["Send half the amount", "Ask the voice note a question only your cousin knows — and call the real number separately", "Send it; the voice proves it is real", "Reply asking for a selfie"],
+    answer: 1, explain: "AI voice cloning copies voices from seconds of audio. 'Don't call back' is the tell — verify on a separate call or with a family code word." },
+  { scenario: "UPI notification: “You have received a collect request of ₹4,999. Enter your UPI PIN to RECEIVE the money.”",
+    prompt: "What happens if you enter the PIN?",
+    options: ["You receive ₹4,999", "Nothing happens", "₹4,999 is DEBITED from your account", "The request expires safely"],
+    answer: 2, explain: "A UPI PIN only ever authorises a payment OUT. Receiving money never needs a PIN — a 'collect request + PIN' takes your money." },
+  { scenario: "Email: “Congratulations! Selected for a Google internship. Pay a refundable security deposit of ₹2,999 to reserve your slot.”",
+    prompt: "What is wrong here?",
+    options: ["The deposit is too small", "Real companies never charge deposits or fees for jobs/internships", "Internships are never given by email", "Google doesn't hire interns"],
+    answer: 1, explain: "Any 'refundable deposit' for a job or internship is fraud. Genuine offers come from official domains with no payment step." },
+  { scenario: "SMS: “Your parcel is held at customs. Pay a ₹48 clearance fee here: track-parcel-india.xyz/pay”",
+    prompt: "Why is a tiny ₹48 fee dangerous?",
+    options: ["It isn't dangerous at all", "The fee is bait — the fake page is built to steal your full card details", "Customs fees are always ₹50", "The parcel doesn't exist so nothing can happen"],
+    answer: 1, explain: "Micro-fee scams harvest card numbers, expiry and CVV on lookalike pages. The ₹48 is nothing; your card data is the prize." },
+  { scenario: "Your 'bank manager' calls: “Your card is being misused. Read me the OTP you just received so I can block it.”",
+    prompt: "Correct action?",
+    options: ["Read only the first 3 digits", "Read it — he is blocking fraud", "Never share it — no bank staff ever needs your OTP; hang up and call the bank yourself", "Ask him to call later"],
+    answer: 2, explain: "An OTP is the key to your account. Anyone asking for it — however official they sound — is the fraud." },
+  { scenario: "WhatsApp investment group: “Guaranteed 300% returns in 30 days! Limited seats, transfer today!”",
+    prompt: "The core red flag?",
+    options: ["300% is too precise", "'Guaranteed returns' cannot legally be promised — real investments carry risk", "The group has too many members", "It uses WhatsApp instead of email"],
+    answer: 1, explain: "Guaranteed high returns + seat scarcity pressure is the pump-and-dump script. Regulated advisors can never guarantee returns." },
+  { scenario: "Your landlord sends a QR code: “Scan this to get your security deposit back, just enter your UPI PIN to confirm receipt.”",
+    prompt: "What does scanning + PIN actually do?",
+    options: ["Releases your deposit", "PAYS money from your account to the QR owner", "Confirms your identity only", "Blocks the deposit"],
+    answer: 1, explain: "QR + PIN always pays out. There is no 'scan to receive' in UPI — refund QR codes are a draining scam." },
+  { scenario: "Email from hr@careers-google-jobs.in asking for your resume, Aadhaar and a ₹999 'verification fee' for an interview.",
+    prompt: "How many red flags are here?",
+    options: ["None — this is normal", "One", "At least three: unofficial domain, fee demand, and sensitive ID collection upfront", "Only the fee"],
+    answer: 2, explain: "Unofficial domain + money demand + ID harvesting before any real process — each alone is a stop sign; together it's certain fraud." },
+  { scenario: "SMS claiming to be TRAI: “Numbers not linked with Aadhaar in 24 hours will be deactivated. Update: trai-update-portal.com”",
+    prompt: "Best response?",
+    options: ["Update quickly before deactivation", "Ignore — TRAI never sends deactivation threats or update links", "Call the number in the SMS", "Share it in family groups"],
+    answer: 1, explain: "Regulators don't threaten deactivation via SMS links. Fear + 24-hour deadline + external portal is social engineering." },
+  { scenario: "A stranger on a call asks you to install a 'support app' (screen-sharing) to fix your banking issue.",
+    prompt: "Why must you refuse?",
+    options: ["The app is usually paid", "Screen-sharing lets the scammer watch you type passwords and OTPs live", "It drains your battery", "Support apps are always slow"],
+    answer: 1, explain: "Remote-access apps give the caller your screen in real time — every OTP and password you type is visible. Banks never ask for them." },
+  { scenario: "You get an OTP SMS for a ₹1 transaction you never started, then a call: “That OTP came by mistake, please share it.”",
+    prompt: "What is really happening?",
+    options: ["A genuine bank error", "Someone is transacting on your account and needs YOUR OTP to complete it — never share", "A free trial activation", "Your number was mis-typed by a friend"],
+    answer: 1, explain: "The OTP belongs to a transaction the caller started on your account. Sharing it completes their fraud, not their 'mistake'." },
+  { scenario: "Email receipt from billing@netflix.com: “Your payment method was declined. Update it by signing in and going to Account > Billing. We never ask for payment details by email.”",
+    prompt: "Is this legit?",
+    options: ["Yes — real domain, self-service direction, no data requested by email", "No — Netflix never emails at all", "Only if it has a red button", "No — all billing emails are phishing"],
+    answer: 0, explain: "Legit pattern: real domain, tells you to sign in yourself, and explicitly refuses email payment details — the opposite of phishing." },
+  { scenario: "A job post on a Telegram channel offers ₹80,000/month for data entry, no interview, 'DM to apply, first 50 only'.",
+    prompt: "Which combination screams scam?",
+    options: ["Telegram + data entry", "Very high pay + no interview + artificial scarcity ('first 50 only')", "Monthly salary mentioned", "It says DM"],
+    answer: 1, explain: "Inflated pay, zero screening and urgency pressure are the recruitment-scam trio. Real hiring has a process." },
+  { scenario: "Your friend's account messages you: “Bro I doubled money in this crypto scheme, send 10k fast, don't tell anyone.”",
+    prompt: "Most likely explanation?",
+    options: ["Your friend found a great scheme", "Your friend's account is hacked and being used to scam their contacts", "It's a prank, send a little", "Crypto always doubles"],
+    answer: 1, explain: "Hacked accounts blast 'investment' messages to trusted contacts. Verify with your friend on a different channel before any money moves." },
+  { prompt: "Which password is strongest?",
+    options: ["manoj@123", "Jaipur2024!", "correct-horse-battery-staple-42", "qwerty@98765"],
+    answer: 2, explain: "Length wins: a multi-word passphrase with a number is far harder to crack than a short name/date pattern, even with symbols." },
+  { prompt: "What does two-factor authentication (2FA) actually protect you from?",
+    options: ["All hacking, completely", "Account takeover when your password alone is stolen or phished", "Slow internet", "Forgetting your password"],
+    answer: 1, explain: "2FA adds a second proof, so a stolen password alone isn't enough. It doesn't make you invincible — OTP phishing still exists." },
+  { prompt: "You must use public café Wi-Fi for banking. Safest choice?",
+    options: ["Just do it, Wi-Fi is Wi-Fi", "Use a trusted VPN, or better, switch to mobile data for banking", "Ask the café owner if it's safe", "Turn off the firewall for speed"],
+    answer: 1, explain: "Open networks can be spoofed or sniffed. Mobile data or a reputable VPN removes the café network from the trust chain." },
+  { prompt: "A website shows a padlock (HTTPS). What does it guarantee?",
+    options: ["The site is genuine and safe", "The connection is encrypted — but the site itself can still be a fake", "Your payment will succeed", "The company is government-approved"],
+    answer: 1, explain: "HTTPS encrypts the pipe, not the intent. Phishing sites get padlocks for free — always check the exact domain too." },
+  { prompt: "Which is the safest way to check if a 'bank KYC' message is real?",
+    options: ["Tap the link but don't type anything", "Reply to the SMS asking if it's real", "Open the official bank app yourself or visit the branch — never via the message's link/number", "Search the message text online and trust the first result"],
+    answer: 2, explain: "Independent channels break the scam's control. If the message were real, the same alert would exist inside the official app." },
+  { prompt: "What is 'vishing'?",
+    options: ["Video fishing", "Voice phishing — fraud phone calls impersonating banks, police or officials", "A type of antivirus", "Verifying invoices"],
+    answer: 1, explain: "Vishing = voice + phishing. The CBI/bank-manager calls in this game are vishing — authority voice, panic, money demand." },
+  { prompt: "Your password was in a data breach. What is the FIRST thing to do?",
+    options: ["Nothing, breaches are common", "Change that password everywhere you reused it, starting with email and banking, and enable 2FA", "Delete the account only", "Post about it online"],
+    answer: 1, explain: "Reuse is the danger: one breach unlocks every account sharing that password. Email first — it's the reset key to everything else." },
+  { prompt: "A pop-up says: “Your device is infected! Call Microsoft support on this number now!”",
+    options: ["Call immediately", "Close it — Microsoft never shows phone numbers in pop-ups; this is tech-support scam bait", "Pay for the antivirus offered", "Restart and call the number"],
+    answer: 1, explain: "Fake-virus pop-ups with a phone number route you to a 'support' scammer who charges for nothing or installs remote access." },
+  { prompt: "Which UPI habit is SAFE?",
+    options: ["Entering PIN to receive a refund", "Checking the payee name shown BEFORE entering your PIN when paying", "Approving collect requests from strangers", "Sharing your UPI PIN with delivery agents"],
+    answer: 1, explain: "The confirmation screen showing the receiver's name is your last check before money leaves. Use it every single time." },
+  { prompt: "Why do scammers insist 'don't tell anyone / don't hang up'?",
+    options: ["Company policy", "Isolation stops a calmer person from spotting the scam and breaks your chance to verify", "To save phone battery", "They are in a hurry to help others"],
+    answer: 1, explain: "Secrecy and continuous contact are control tactics. Any legitimate process survives you hanging up and verifying independently." }
 ];

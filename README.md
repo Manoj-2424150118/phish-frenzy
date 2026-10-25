@@ -1,30 +1,44 @@
-# 🎣 Phish Frenzy — Spot the Scam, Beat Your Friends
+# 🎣 Phish Frenzy — The Multiplayer Quiz Arena
 
-A **real-time multiplayer party game** built for the **Handshake × OpenAI “Create a Multiplayer Game”** mission (AI Skills Studio).
-
-A message flashes up — an SMS, a WhatsApp, an email, a phone call. Is it a **scam** or **legit**? Everyone answers at once, fastest correct tap wins bonus points, streaks catch fire 🔥, and every round ends with the real-world red flag explained — so players leave sharper than they arrived.
+A **free, real-time multiplayer quiz game** built for the **Handshake × OpenAI “Create a Multiplayer Game”** mission (AI Skills Studio). No logins, no credentials, no installs — open the link and play.
 
 ## ▶ Play it
 
-**Live demo:** https://phish-frenzy.onrender.com — open it, create a room, share the 4-letter code. Friends join from any phone or laptop. **No logins. No installs.** (Free tier: first load after idle can take ~50 seconds to wake.)
+**Live:** https://phish-frenzy.onrender.com (free tier: first load after idle can take ~50s to wake)
 
-Solo? Tick **“Add 2 demo bots”** and you still get the full multiplayer feel.
+**Step 1:** type any name. **Step 2:** choose who you play against —
 
-## How it plays
+- **🤖 Solo vs Bots** — instant game against two built-in bots.
+- **👥 Play with Friends** — *Create a room* to get a **room code**, share it, and everyone who enters that same code plays together live. Or *Join* with a code a friend shared.
 
-1. **Create or join** a room with a 4-letter code
-2. **10 rounds** — a scenario appears for everyone at the same instant (Socket.io sync)
-3. Tap **🚨 SCAM** or **✅ LEGIT** — 100 pts + speed bonus (up to +100) + streak bonus (+25 at 3-in-a-row)
-4. **Reveal** — the answer plus the red flag that gives it away (UPI PINs are never for *receiving* money; “digital arrest” isn’t real; check the sender domain letter by letter…)
-5. **Podium** — final leaderboard, then play again in the same room, any night
+## 🔑 Room-code lifecycle (by design)
 
-## The bank
+A code is the key to one room and **stays valid while the group is playing** — it never expires mid-game or while a game is unfinished. Only after the game **finishes and every player has left** is the code deleted and retired. Anyone holding the code can join that room, so share it only with your group.
 
-24 hand-written scenarios drawn from real fraud patterns — KYC-block SMS, task-job WhatsApp scams, AI voice-clone family emergencies, QR-refund refund traps, digital-arrest calls — mixed with genuinely legitimate alerts, so “everything is a scam” is a losing strategy.
+## How a game plays
+
+1. Exactly **10 questions** per game, drawn fresh from the bank (or from your custom quiz)
+2. Every question has **4 options**; everyone answers simultaneously
+3. The instant *you* answer, you get your verdict — **✅ Correct / ❌ Not quite** — with points and a short clarification. The live leaderboard updates in real time as answers land
+4. Scoring: 100 pts + speed bonus (up to +100) + streak bonus (+25 at 3-in-a-row)
+5. Podium at the end, then play again in the same room
+
+## 🔒 Answer security
+
+Correct answers **never leave the server** before you answer — they can't be viewed by inspecting the page or its traffic. Each question instead carries a **SHA-256 commitment hash** of the locked answer; at round end the salt is revealed so anyone can verify the answer was fixed in advance and never changed mid-round.
+
+## 📚 Build a quiz from YOUR notes
+
+Paste notes or upload a **PDF / TXT / MD** file — the server extracts the text, analyses it (definitions + key-term cloze questions) and builds a brand-new 4-option quiz (up to 20 questions) for your room. Your group joins with the room code and tests itself on *your* material: class revision, team training, interview prep.
+
+## The default bank
+
+30 hand-written scam-awareness MCQs from real fraud patterns — KYC-block SMS, task-job WhatsApp scams, AI voice-clone family emergencies, QR refund traps, digital-arrest calls, plus the security fundamentals (2FA, passphrases, UPI PIN rules) — each with a plain-language clarification.
 
 ## Tech
 
 - **Node.js + Express + Socket.io** — one small service, in-memory rooms (no database, no accounts)
+- **pdfjs-dist** for PDF text extraction; rule-based quiz generation (no paid AI APIs — ₹0 to run)
 - Vanilla HTML/CSS/JS frontend — mobile-first, zero build step
 - `render.yaml` Blueprint for one-click free-tier deployment
 
