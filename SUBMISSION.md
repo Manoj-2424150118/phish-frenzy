@@ -15,7 +15,7 @@
 ## Ready-to-paste submission fields
 - **Title:** Phish Frenzy — Spot the Scam, Beat Your Friends
 - **Description:** A real-time multiplayer party game that trains scam-spotting. A message flashes up — SMS, WhatsApp, email or call — and every player races to call it: SCAM or LEGIT? Fast correct answers and streaks earn bonus points; every round ends with the real red flag explained (fake KYC links, UPI collect-request traps, AI voice-clone family scams, 'digital arrest' calls). 24 scenarios drawn from real fraud patterns, mixed with genuine alerts so players learn judgement, not just suspicion. Join any room with a 4-letter code — no logins, no installs, works on any phone or laptop, and the same room replays any night. Play it solo against demo bots or with a full crew.
-- **Project link:** (paste live Render URL once deploy verifies)
+- **Project link:** https://phish-frenzy.onrender.com (deployed & health-verified 26 Oct 2026, Render free tier, Blueprint from this repo)
 - **Cover image:** cover.png in this repo (add before submitting)
 
 ## Remaining steps for Manoj (only he can do these)

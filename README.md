@@ -6,7 +6,7 @@ A message flashes up — an SMS, a WhatsApp, an email, a phone call. Is it a **s
 
 ## ▶ Play it
 
-**Live demo:** _deployed URL added on launch_ — open it, create a room, share the 4-letter code. Friends join from any phone or laptop. **No logins. No installs.**
+**Live demo:** https://phish-frenzy.onrender.com — open it, create a room, share the 4-letter code. Friends join from any phone or laptop. **No logins. No installs.** (Free tier: first load after idle can take ~50 seconds to wake.)
 
 Solo? Tick **“Add 2 demo bots”** and you still get the full multiplayer feel.
 
