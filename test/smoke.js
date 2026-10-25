@@ -98,9 +98,22 @@ async function main() {
   if (boardUpdates < 3) throw new Error('leaderboard did not update in realtime (updates=' + boardUpdates + ')');
   console.log(`✓ full game finished; leaderboard broadcast ${boardUpdates} times`);
 
-  // --- lifecycle: finished + everyone leaves => code deleted ---
-  host.emit('leave_room'); guest.emit('leave_room');
+  // --- lifecycle D1 regression: a LATE joiner after the game finished must
+  // not defeat retirement — code dies once finish + everyone has left ---
+  const late = io(URL);
+  await new Promise(r => late.on('connect', r));
+  const lateJoin = await new Promise(r => late.emit('join_room', { name: 'Late', code: created.code }, r));
+  if (!lateJoin.ok) throw new Error('late join into finished room should be allowed while players remain');
+  console.log('✓ late joiner entered finished room (code alive while group present)');
+  host.emit('leave_room'); guest.emit('leave_room'); late.emit('leave_room');
   await wait(500);
+  const rejoinLate = await new Promise(r => late.emit('join_room', { name: 'Zombie', code: created.code }, r));
+  if (rejoinLate.ok) throw new Error('D1: code survived finish + late join + everyone leaving');
+  console.log('✓ code retired even with a late joiner (D1 regression)');
+  late.close();
+
+  // --- lifecycle: finished + everyone leaves => code deleted ---
+  await wait(200);
   const rejoin = await new Promise(r => host.emit('join_room', { name: 'Late', code: created.code }, r));
   if (rejoin.ok) throw new Error('finished+empty room code should be deleted');
   console.log('✓ room code retired after game finished and everyone left');

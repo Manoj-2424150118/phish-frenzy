@@ -354,7 +354,9 @@ io.on('connection', (socket) => {
       broadcastState(room);
       return;
     }
-    if (room.finished) { room.phase = 'lobby'; room.finished = false; }
+    // NOTE: joining a finished (podium) room must NOT clear `finished` —
+    // only the host starting a new game (start_game / play_again) does that.
+    // Otherwise a late joiner silently defeats the finish + all-left retirement.
     room.players.set(socket.id, { id: socket.id, name: clean, score: 0, streak: 0, connected: true });
     socket.data.code = cleanCode;
     socket.join(cleanCode);
