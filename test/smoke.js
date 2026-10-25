@@ -3,8 +3,24 @@
 // room-code lifecycle (persists unfinished; deleted only after finish + all leave).
 const { io } = require('socket.io-client');
 const crypto = require('crypto');
-const URL = process.env.TEST_URL || 'http://localhost:3000';
+const { spawn } = require('child_process');
+const path = require('path');
+const URL = process.env.TEST_URL || 'http://localhost:3210';
 const wait = ms => new Promise(r => setTimeout(r, ms));
+
+let serverProc = null;
+async function bootServerIfNeeded() {
+  if (process.env.TEST_URL) return; // external server (e.g. production) — test as-is
+  serverProc = spawn('node', [path.join(__dirname, '..', 'server.js')], {
+    env: { ...process.env, PORT: '3210', ROUND_END_MS: '500', QUESTION_MS: '8000' },
+    stdio: 'ignore'
+  });
+  for (let i = 0; i < 40; i++) {
+    try { const r = await fetch(URL + '/health'); if (r.ok) return; } catch {}
+    await wait(250);
+  }
+  throw new Error('test server did not boot on ' + URL);
+}
 
 const NOTES = [
   'Photosynthesis is the process by which green plants convert sunlight, water and carbon dioxide into oxygen and glucose.',
@@ -18,6 +34,21 @@ const NOTES = [
 ].join(' ');
 
 async function main() {
+  await bootServerIfNeeded();
+  // --- crash regression: malformed payloads must never kill the server ---
+  const evil = io(URL);
+  await new Promise(r => evil.on('connect', r));
+  evil.emit('answer', null);
+  evil.emit('create_room', null);
+  evil.emit('join_room', 'a-string');
+  evil.emit('answer', { optionIndex: NaN });
+  evil.emit('answer', { optionIndex: 1.5 });
+  await wait(400);
+  const alive = await fetch(URL + '/health').then(r => r.ok).catch(() => false);
+  if (!alive) throw new Error('server died on malformed payloads');
+  console.log('✓ malformed-payload crash regression: server alive');
+  evil.close();
+
   // --- custom quiz generation from pasted notes ---
   const genRes = await fetch(URL + '/api/quiz/from-text', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -42,7 +73,6 @@ async function main() {
   host.on('leaderboard', () => boardUpdates++);
   host.on('question', q => {
     if (!q.options || q.options.length !== 4) throw new Error('question does not have exactly 4 options');
-    const raw = JSON.stringify(q);
     if ('answer' in q || 'correctIndex' in q || 'explain' in q) throw new Error('LEAK: question payload exposes the answer!');
     commit = q.commit;
     host.emit('answer', { optionIndex: 0 });
@@ -86,6 +116,7 @@ async function main() {
   console.log('✓ unfinished room code stays valid even after host disconnects');
   g2.close(); guest.close();
   console.log('\nSMOKE TEST V2 PASSED');
+  if (serverProc) serverProc.kill();
   process.exit(0);
 }
-main().catch(e => { console.error('SMOKE TEST FAILED:', e.message); process.exit(1); });
+main().catch(e => { console.error('SMOKE TEST FAILED:', e.message); if (serverProc) serverProc.kill(); process.exit(1); });

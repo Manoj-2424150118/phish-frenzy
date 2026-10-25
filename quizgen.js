@@ -35,8 +35,16 @@ function vocab(sentences) {
 }
 
 function finish(prompt, correct, distractors, explain) {
-  const opts = shuffle([correct, ...shuffle(distractors).slice(0, 3)]);
-  if (opts.length < 4) return null;
+  // Options must be 4 UNIQUE strings — a duplicate of the correct text would
+  // make the answer key ambiguous.
+  const seen = new Set([String(correct).trim().toLowerCase()]);
+  const uniqueDistractors = [];
+  for (const d of shuffle(distractors)) {
+    const key = String(d).trim().toLowerCase();
+    if (!seen.has(key)) { seen.add(key); uniqueDistractors.push(d); }
+  }
+  if (uniqueDistractors.length < 3) return null;
+  const opts = shuffle([correct, ...uniqueDistractors.slice(0, 3)]);
   return { prompt, options: opts, answer: opts.indexOf(correct), explain };
 }
 
@@ -91,7 +99,7 @@ function generateFromText(rawText, max = 20) {
     usedPrompts.add(key);
     const display = Math.random() < 0.5 ? answerWord : answerWord.toLowerCase();
     const q = finish(`Fill in the blank from your notes: “${blanked}”`, display,
-      shuffle(distractors).slice(0, 3).map(w => Math.random() < 0.5 ? w : w),
+      shuffle(distractors).slice(0, 6),
       `From your notes: “${clean}.”`);
     if (q) questions.push(q);
   }

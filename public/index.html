@@ -9,6 +9,7 @@
 </head>
 <body>
   <div class="bg-glow"></div>
+  <div id="conn-banner" class="conn-banner hidden">⚠️ Connection lost — reconnecting… your seat and score are saved if you rejoin this room with the same name.</div>
   <main class="wrap">
     <header class="brand">
       <div class="logo">🎣</div>
@@ -43,11 +44,24 @@
         </div>
       </div>
       <p id="home-error" class="error"></p>
-      <p class="fine">🔑 How room codes work: a code is the key to one room. It stays valid while your group is playing — it is only deleted after the game finishes <i>and</i> everyone has left. Anyone with the code can join that room, so share it only with your group.</p>
+
+      <div class="howto">
+        <h3>📖 How to play — the whole game, no explanation needed</h3>
+        <ul>
+          <li><b>Goal:</b> score the most points. Highest score when the game ends wins. 🏆</li>
+          <li><b>A game is 10 questions.</b> Every question has <b>4 options</b> and a <b>25-second</b> timer. Everyone answers the same question at the same time.</li>
+          <li><b>Tap once — your answer locks in</b> and can't be changed. You instantly see if you were right, why, and your points.</li>
+          <li><b>Scoring:</b> 100 pts for a correct answer + up to 100 speed bonus (faster = more) + 25 pts streak bonus when you hit 3 correct in a row (that's the 🔥 next to a name).</li>
+          <li><b>The round ends</b> when everyone has answered or time runs out. After question 10, the final podium shows the winner.</li>
+          <li><b>👑 = the host</b> (the person who created the room). Only the host can press Start and Play Again. Up to 12 players per room. Joining mid-game makes you a spectator for that game — you play from the next one.</li>
+          <li><b>🔑 Room codes:</b> a code is the key to one room. It stays valid while your group is playing and is deleted only after the game finishes <i>and</i> everyone has left. Anyone with the code can join, so share it only with your group.</li>
+          <li><b>Dropped connection?</b> Rejoin the same room with the same name and you reclaim your seat and score.</li>
+        </ul>
+      </div>
 
       <div class="divider"><span>make it yours</span></div>
       <h3>📚 Build a quiz from YOUR notes</h3>
-      <p class="how">Paste notes or upload a PDF/TXT — the game analyses them and builds a brand-new 4-option quiz for your room. Any group with your room code can then test themselves on <i>your</i> material.</p>
+      <p class="how">Paste notes (200+ characters; definitions like “X is…” work best) or upload a PDF/TXT/MD (max 6 MB) — the game analyses them and builds a brand-new 4-option quiz for your room. Any group with your room code can then test themselves on <i>your</i> material. If fewer than 10 questions can be built, your game is simply a little shorter.</p>
       <textarea id="notes-input" rows="5" placeholder="Paste your notes here… (definitions like “Photosynthesis is the process by which…” work best)"></textarea>
       <div class="row">
         <button id="btn-notes" class="btn">Build quiz from pasted notes</button>
@@ -56,13 +70,16 @@
         </label>
       </div>
       <p id="quiz-status" class="quiz-status"></p>
+      <p id="quiz-reset-row" class="fine hidden">Using a custom quiz right now. <a href="#" id="quiz-reset">✖ Switch back to the built-in scam-spotting bank</a></p>
     </section>
 
     <!-- LOBBY -->
     <section id="screen-lobby" class="card screen">
-      <h2>Room <span id="lobby-code" class="pill"></span></h2>
+      <h2>Room <span id="lobby-code" class="pill"></span> <button id="btn-copy" class="btn small">📋 Copy code</button></h2>
       <p class="how">Friends: open this same page → <b>Play with Friends</b> → enter this code. The code stays alive until the game ends and everyone leaves.</p>
+      <p class="fine">👑 = host — only the host can start the game. 10 questions • 4 options each • 25 seconds per question • most points wins.</p>
       <p id="lobby-source" class="fine"></p>
+      <p id="spectator-note" class="quiz-status hidden">👀 A game is running in this room — you're spectating this one and will play from the next game.</p>
       <ul id="lobby-players" class="players"></ul>
       <div class="row">
         <button id="btn-start" class="btn primary hidden">▶ Start game</button>
@@ -76,6 +93,7 @@
       <div class="game-top">
         <span id="round-label" class="pill"></span>
         <div class="timerbar"><div id="timer-fill"></div></div>
+        <span id="timer-text" class="timer-text">25s</span>
         <span id="answered-label" class="fine"></span>
       </div>
       <div class="scenario">
@@ -84,22 +102,26 @@
       </div>
       <div id="options" class="options"></div>
       <div id="feedback" class="feedback hidden"></div>
-      <p class="fine">🔒 Answers are encrypted server-side — nobody can peek at them in the page source. Each question carries a verification hash, revealed at round end.</p>
-      <h4 class="board-title">Live leaderboard</h4>
+      <p id="hash-line" class="fine"></p>
+      <h4 class="board-title">Live leaderboard <span class="fine">(🔥 = 3+ correct in a row)</span></h4>
       <ul id="board" class="players"></ul>
       <button id="btn-leave-game" class="btn">Leave room</button>
     </section>
 
     <!-- PODIUM -->
     <section id="screen-podium" class="card screen">
-      <h2>🏆 Final results</h2>
+      <h2 id="winner-line">🏆 Final results</h2>
       <div id="podium"></div>
       <ul id="final-board" class="players"></ul>
+      <div id="review-zone" class="hidden">
+        <h3>📚 Review — the ones you missed</h3>
+        <div id="review-list"></div>
+      </div>
       <div class="row">
         <button id="btn-again" class="btn primary hidden">↩ Play again in this room</button>
         <button id="btn-leave-podium" class="btn">Leave room</button>
       </div>
-      <p class="fine">When everyone leaves after a finished game, this room code is deleted and retired.</p>
+      <p class="fine">Non-hosts: the host can restart this room with Play Again. When everyone leaves after a finished game, this room code is deleted and retired.</p>
     </section>
 
     <footer class="foot">Free to play • No logins • Built for the Handshake × OpenAI “Create a Multiplayer Game” mission</footer>
